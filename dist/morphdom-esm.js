@@ -45,6 +45,13 @@ function morphAttrs(fromNode, toNode) {
 
     for (var d = fromNodeAttrs.length - 1; d >= 0; d--) {
         attr = fromNodeAttrs[d];
+        if (attr === undefined) {
+          // This can happen when a removal of an attribute causes the automatic
+          // removal of another attribute. For example when removing the "src" 
+          // attribute from a "turbo-frame" element the attribute "complete" is
+          // automatically removed too.
+          continue;
+        }
         attrName = attr.name;
         attrNamespaceURI = attr.namespaceURI;
 
@@ -323,6 +330,7 @@ function morphdomFactory(morphAttrs) {
     var onBeforeNodeAdded = options.onBeforeNodeAdded || noop;
     var onNodeAdded = options.onNodeAdded || noop;
     var onBeforeElUpdated = options.onBeforeElUpdated || noop;
+    var onBeforeElAttrsUpdated = options.onBeforeElAttrsUpdated || noop;
     var onElUpdated = options.onElUpdated || noop;
     var onBeforeNodeDiscarded = options.onBeforeNodeDiscarded || noop;
     var onNodeDiscarded = options.onNodeDiscarded || noop;
@@ -495,8 +503,11 @@ function morphdomFactory(morphAttrs) {
           return;
         }
 
-        // update attributes on original DOM element first
-        morphAttrs(fromEl, toEl);
+        if (onBeforeElAttrsUpdated(fromEl, toEl) !== false) {
+          // update attributes on original DOM element first
+          morphAttrs(fromEl, toEl);
+        }
+
         // optional
         onElUpdated(fromEl);
 

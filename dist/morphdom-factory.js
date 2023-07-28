@@ -261,6 +261,7 @@ function morphdomFactory(morphAttrs) {
     var onBeforeNodeAdded = options.onBeforeNodeAdded || noop;
     var onNodeAdded = options.onNodeAdded || noop;
     var onBeforeElUpdated = options.onBeforeElUpdated || noop;
+    var onBeforeElAttrsUpdated = options.onBeforeElAttrsUpdated || noop;
     var onElUpdated = options.onElUpdated || noop;
     var onBeforeNodeDiscarded = options.onBeforeNodeDiscarded || noop;
     var onNodeDiscarded = options.onNodeDiscarded || noop;
@@ -433,8 +434,11 @@ function morphdomFactory(morphAttrs) {
           return;
         }
 
-        // update attributes on original DOM element first
-        morphAttrs(fromEl, toEl);
+        if (onBeforeElAttrsUpdated(fromEl, toEl) !== false) {
+          // update attributes on original DOM element first
+          morphAttrs(fromEl, toEl);
+        }
+
         // optional
         onElUpdated(fromEl);
 
